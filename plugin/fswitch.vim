@@ -168,7 +168,8 @@ function! s:FSGetAlternateFilename(filepath, filename, newextension, location, m
         let cmd = parts[0]
         let directive = parts[1]
     endif
-    if cmd == 'reg' || cmd == 'ifrel' || cmd == 'ifabs'
+    "echom "path:" . a:filepath . " file:" . a:filename . " ext:" . a:newextension . " loc:" . a:location . " " . a:mustmatch
+    if cmd == 'reg' || cmd == 'ifrel' || cmd == 'ifabs' || cmd == 'reln'
         if strlen(directive) < 3
             throw 'Bad directive "' . a:location . '".'
         else
@@ -203,15 +204,45 @@ function! s:FSGetAlternateFilename(filepath, filename, newextension, location, m
                     else
                         let path = part2 . s:os_slash . a:filename . '.' . a:newextension
                     endif
+                elseif cmd == 'reln'
+                    let path = ""
+                    let relpath = a:filepath
+                    for i in range(1, part1)
+                        let relpath = fnamemodify(relpath, ':h')
+                        let fpath = relpath . s:os_slash . part2 . s:os_slash . a:filename . '.' . a:newextension
+                        if filereadable(fpath)
+                            let path = fpath
+                            break
+                        endif
+                        "echom "n:" . i . " path:" . relpath . ' f:' .fpath
+                    endfor
                 endif
             endif
         endif
+    elseif cmd == 'find'
+        let separator = strpart(directive, 0, 1)
+        let dirparts = split(strpart(directive, 1), separator)
+        if len(dirparts) != 1
+            throw 'Bad directive "' . a:location . '".'
+        endif
+        let part1 = dirparts[0]
+        let path = ""
+        let relpath = a:filepath
+        for i in range(1, part1)
+            let relpath = fnamemodify(relpath, ':h')
+            let all_files = split(system('find '. relpath .' -type f -name '.a:filename . '.' . a:newextension), "\n")
+            if (len(all_files) > 0)
+                let path = all_files[0]
+                break
+            else
+                let relpath = fnamemodify(relpath, ':h')
+            endif
+        endfor
     elseif cmd == 'rel'
         let path = a:filepath . s:os_slash . directive . s:os_slash . a:filename . '.' . a:newextension
     elseif cmd == 'abs'
         let path = directive . s:os_slash . a:filename . '.' . a:newextension
     endif
-
     return simplify(path)
 endfunction
 
@@ -335,17 +366,17 @@ endfunction
 "
 augroup fswitch_au_group
     au!
-    au BufEnter *.c    call s:SetVariables('h',       'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.cc   call s:SetVariables('hh',      'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.cpp  call s:SetVariables('hpp,h',   'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.cxx  call s:SetVariables('hxx',     'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.C    call s:SetVariables('H',       'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.m    call s:SetVariables('h',       'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|')
-    au BufEnter *.h    call s:SetVariables('c,cpp,m', 'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|')
-    au BufEnter *.hh   call s:SetVariables('cc',      'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|')
-    au BufEnter *.hpp  call s:SetVariables('cpp',     'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|')
-    au BufEnter *.hxx  call s:SetVariables('cxx',     'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|')
-    au BufEnter *.H    call s:SetVariables('C',       'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|')
+    au BufEnter *.c    call s:SetVariables('h',          'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.cc   call s:SetVariables('h,hh',       'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.cpp  call s:SetVariables('h,hpp',      'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.cxx  call s:SetVariables('h,hxx',      'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.C    call s:SetVariables('h,H',        'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.m    call s:SetVariables('h',          'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
+    au BufEnter *.h    call s:SetVariables('c,cc,cpp,m', 'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
+    au BufEnter *.hh   call s:SetVariables('cc',         'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
+    au BufEnter *.hpp  call s:SetVariables('cpp',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
+    au BufEnter *.hxx  call s:SetVariables('cxx',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
+    au BufEnter *.H    call s:SetVariables('C',          'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
 augroup END
 
 "
