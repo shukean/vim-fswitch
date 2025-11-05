@@ -372,11 +372,11 @@ augroup fswitch_au_group
     au BufEnter *.cxx  call s:SetVariables('h,hxx',      'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
     au BufEnter *.C    call s:SetVariables('h,H',        'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
     au BufEnter *.m    call s:SetVariables('h',          'reg:/src/include/,reg:|src|include/**|,ifrel:|/src/|../include|,reln:/3/include')
-    au BufEnter *.h    call s:SetVariables('c,cc,cpp,m', 'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
-    au BufEnter *.hh   call s:SetVariables('cc',         'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
-    au BufEnter *.hpp  call s:SetVariables('cpp',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
-    au BufEnter *.hxx  call s:SetVariables('cxx',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
-    au BufEnter *.H    call s:SetVariables('C',          'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,find:/2/')
+    au BufEnter *.h    call s:SetVariables('cc,cpp,c,m', 'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,rel:./,find:/1/')
+    au BufEnter *.hh   call s:SetVariables('cc',         'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,rel:./,find:/1/')
+    au BufEnter *.hpp  call s:SetVariables('cpp',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,rel:./,find:/1/')
+    au BufEnter *.hxx  call s:SetVariables('cxx',        'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,rel:./,find:/1/')
+    au BufEnter *.H    call s:SetVariables('C',          'reg:/include/src/,reg:/include.*/src/,ifrel:|/include/|../src|,rel:./,find:/1/')
 augroup END
 
 "
